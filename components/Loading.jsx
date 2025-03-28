@@ -3,7 +3,7 @@ import React from "react";
 import {theme} from "../constants/theme";
 
 
-const Loading = ({size="Large", color=theme.colors.primary}) => {
+const Loading = ({size="large", color=theme.colors.primary}) => {
     return (
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
             <ActivityIndicator size={size} color={color} />

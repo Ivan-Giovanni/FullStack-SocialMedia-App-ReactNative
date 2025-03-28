@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, Pressable } from "react-native";
+import { Text, StyleSheet, View, Pressable, Alert } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import BackButton from "../components/BackButton";
@@ -11,8 +11,7 @@ import { hp, wp } from "../helpers/common";
 import { useState } from "react";
 import { useRef } from "react";
 import Button from "../components/Button";
-import { Alert } from "react-native";
-
+import { supabase, testSupabaseConnection } from "../lib/supabase";
 
 const SignUp = () => {
     const router = useRouter();
@@ -21,15 +20,54 @@ const SignUp = () => {
     const nameRef = useRef("");
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = async() => {
-        if(!emailRef.current || !passwordRef.current || !nameRef.current) {
+
+    const onSubmit = async () => {
+        // Test Supabase connection first
+        console.log('Testing Supabase connection...');
+        const isConnected = await testSupabaseConnection();
+        if (!isConnected) {
+            Alert.alert('Connection Error', 'Could not connect to Supabase. Please check your internet connection and try again.');
+            return;
+        }
+        console.log('Supabase connection test passed!');
+
+        if (!emailRef.current || !passwordRef.current || !nameRef.current) {
             Alert.alert('SignUp', 'Please fill all fields');
             return;
         }
 
-        // Good to go
-    }
+        let name = nameRef.current.trim();
+        let email = emailRef.current.trim();
+        let password = passwordRef.current.trim();
 
+        setLoading(true);
+
+        try {
+            console.log('Starting signup...', { name, email });
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { name }
+                }
+            });
+
+            console.log('Signup response:', { data, error });
+
+            if (error) {
+                Alert.alert('SignUp Error', error.message);
+                return;
+            }
+
+
+        } catch (error) {
+            console.error('Signup error:', error);
+            Alert.alert('Error', 'An unexpected error occurred');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <ScreenWrapper bg='white'>

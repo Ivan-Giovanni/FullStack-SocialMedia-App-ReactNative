@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useRef } from "react";
 import Button from "../components/Button";
 import { Alert } from "react-native";
-
+import { supabase, testSupabaseConnection } from "../lib/supabase";
 
 const Login = () => {
     const router = useRouter();
@@ -20,15 +20,53 @@ const Login = () => {
     const passwordRef = useRef("");
     const [loading, setLoading] = useState(false);
 
-    const onSubmit = async() => {
-        if(!emailRef.current || !passwordRef.current) {
+    const onSubmit = async () => {
+        if (!emailRef.current || !passwordRef.current) {
             Alert.alert('Login', 'Please fill all fields');
             return;
         }
 
         // Good to go
-    }
+        let email = emailRef.current.trim();
+        let password = passwordRef.current.trim();
 
+        setLoading(true);
+
+        try {
+            console.log('Testing Supabase connection...');
+            const isConnected = await testSupabaseConnection();
+            if (!isConnected) {
+                Alert.alert('Connection Error', 'Could not connect to Supabase. Please check your internet connection and try again.');
+                return;
+            }
+            console.log('Supabase connection test passed!');
+
+            console.log('Starting login...', { email });
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            console.log('Login response:', { data, error });
+
+            if (error) {
+                console.error('Login error:', error);
+                Alert.alert('Login', error.message);
+                return;
+            }
+
+            if (data?.user) {
+                Alert.alert('Success', 'Welcome back!');
+            }
+
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <ScreenWrapper bg='white'>
@@ -50,7 +88,7 @@ const Login = () => {
                             <Icon name="mail" strokeWidth={1.6} size={26} />
                         }
                         placeholder="Enter your email"
-                        onChangeText={value => {emailRef.current = value}}
+                        onChangeText={value => { emailRef.current = value }}
                     />
                     <Input
                         icon={
@@ -58,7 +96,7 @@ const Login = () => {
                         }
                         placeholder="Enter your password"
                         secureTextEntry
-                        onChangeText={value => {passwordRef.current = value}}
+                        onChangeText={value => { passwordRef.current = value }}
                     />
                     <Text style={styles.forgotPassword}>Forgot Password?</Text>
 
@@ -74,7 +112,7 @@ const Login = () => {
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Don't have an account?</Text>
                     <Pressable onPress={() => router.push('signUp')}>
-                        <Text style={[styles.footerText, {color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold}]}>Sign up</Text>
+                        <Text style={[styles.footerText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>Sign up</Text>
                     </Pressable>
                 </View>
             </View>
@@ -82,7 +120,7 @@ const Login = () => {
     )
 }
 
-export default Login
+export default Login;
 
 const styles = StyleSheet.create({
     container: {
