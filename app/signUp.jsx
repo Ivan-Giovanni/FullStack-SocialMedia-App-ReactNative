@@ -49,7 +49,7 @@ const SignUp = () => {
                 email,
                 password,
                 options: {
-                    data: { name }
+                    data: { name, email }
                 }
             });
 

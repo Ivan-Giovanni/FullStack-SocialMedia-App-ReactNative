@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const setUserData = userData => {
+        console.log('[AuthContext.js] old user: ', user);
         setUser({...userData});
     }
 

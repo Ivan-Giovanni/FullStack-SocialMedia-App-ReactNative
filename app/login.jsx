@@ -13,6 +13,8 @@ import { useRef } from "react";
 import Button from "../components/Button";
 import { Alert } from "react-native";
 import { supabase, testSupabaseConnection } from "../lib/supabase";
+import { setAuth } from "../contexts/AuthContext";
+import { getUserData } from "../services/userService";
 
 const Login = () => {
     const router = useRouter();
@@ -26,7 +28,6 @@ const Login = () => {
             return;
         }
 
-        // Good to go
         let email = emailRef.current.trim();
         let password = passwordRef.current.trim();
 
@@ -57,7 +58,14 @@ const Login = () => {
             }
 
             if (data?.user) {
+                const userData = {
+                    ...data.user,
+                    name: data.user.user_metadata?.name || ''
+                };
+
+                setAuth(userData);
                 Alert.alert('Success', 'Welcome back!');
+                router.replace('/(main)');
             }
 
         } catch (error) {

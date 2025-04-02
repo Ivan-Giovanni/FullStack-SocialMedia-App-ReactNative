@@ -1,13 +1,16 @@
-import { Text, StyleSheet, View, Button, Alert, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, View, Button, Alert, TouchableOpacity, Pressable } from "react-native";
 import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import { hp, wp } from "../../helpers/common";
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import { theme } from "../../constants/theme";
 import { supabase } from "../../lib/supabase";
+import Avatar from "../../components/Avatar";
+import Icon from "../../assets/icons";
+
+
 
 
 
@@ -53,13 +56,61 @@ const Profile = () => {
 }
 
 const UserHeader = ({ user, router, handleLogout }) => {
+    console.log('User object:', user);
+    console.log('User name:', user?.name);
     return (
         <View style={{ flex: 1, backgroundColor: 'white', paddingHorizontal: wp(4) }}>
-            <Header title='Profile' showBackButton={true} />
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Icon name="sign-out-alt" color={theme.colors.rose} />
-            </TouchableOpacity>
+            <View>
+                <Header title='Profile' mb={30} />
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                    <Icon name="logout" color={theme.colors.rose} />
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.container}>
+                <View style={{ gap: 15 }}>
+                    <View style={styles.avatarContainer}>
+                        <Avatar
+                            uri={user?.image}
+                            size={hp(12)}
+                            rounded={theme.radius.xxl * 1.4} />
+                        <Pressable style={styles.editIcon} onPress={() => router.push('editProfile')}>
+                            <Icon name="edit" strokeWidth={2.5} size={20} />
+                        </Pressable>
+                    </View>
+
+                    {/* username and address */}
+
+                    <View style={{ alignItems: 'center', gap: 4 }}>
+                        <Text style={styles.userName}>{user?.name}</Text>
+                        <Text style={styles.infoText}>{user?.address}</Text>
+                    </View>
+
+                    {/* email, phone, email */}
+                    <View style={{ gap: 10 }}>
+                        <View style={styles.info}>
+                            <Icon name="mail" size={20} color={theme.colors.textLight} />
+                            <Text style={styles.infoText}>{user?.email}</Text>
+                        </View>
+                    </View>
+
+                    {user && user.phoneNumber && (
+                        <View style={{ gap: 10 }}>
+                            <View style={styles.info}>
+                                <Icon name="call" size={20} color={theme.colors.textLight} />
+                                <Text style={styles.infoText}>{user?.phoneNumber}</Text>
+                            </View>
+                        </View>
+                    )}
+
+                    {user && user.bio && (
+                        <Text style={styles.infoText}>{user?.bio}</Text>
+                    )}
+                </View>
+            </View>
         </View>
+
+
     )
 }
 
@@ -112,7 +163,7 @@ const styles = StyleSheet.create({
     },
     logoutButton: {
         position: 'absolute',
-        right: 5,
+        right: 0,
         padding: 5,
         borderRadius: theme.radius.sm,
         backgroundColor: '#fee2e2'
