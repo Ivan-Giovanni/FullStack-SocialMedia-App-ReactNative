@@ -56,8 +56,8 @@ const Profile = () => {
 }
 
 const UserHeader = ({ user, router, handleLogout }) => {
-    console.log('User object:', user);
-    console.log('User name:', user?.name);
+    console.log('[profile.jsx] User object:', user);
+    console.log('[profile.jsx] User name:', user?.name);
     return (
         <View style={{ flex: 1, backgroundColor: 'white', paddingHorizontal: wp(4) }}>
             <View>

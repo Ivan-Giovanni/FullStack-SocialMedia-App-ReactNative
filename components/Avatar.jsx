@@ -13,9 +13,10 @@ const Avatar = ({
     rounded = theme.radius.md,
     style = {}
 }) => {
+    console.log('[Avatar].[getUserImageSrc] uri: ', getUserImageSrc(uri));
     return (
         <Image
-            source={getUserImageSrc(uri)}
+            source={getUserImageSrc(uri).uri}
             transition={100}
             style={
                 [styles.avatar, { height: size, width: size, borderRadius: rounded}, style ]}

@@ -11,6 +11,10 @@ import Button from "../../components/Button";
 import { updateUser } from "../../services/userService";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
+import { uploadFile } from "../../services/imageService";
+import { getUserImageSrc } from "../../services/imageService";
+
+
 
 
 
@@ -29,7 +33,7 @@ const EditProfile = () => {
     });
 
     useEffect(() => {
-        if(currentUser) {
+        if (currentUser) {
             setUser({
                 name: currentUser.name || '',
                 phoneNumber: currentUser.phoneNumber || '',
@@ -40,10 +44,10 @@ const EditProfile = () => {
         }
     }, [currentUser]);
 
-    
+
 
     const onPickImage = async () => {
-        
+
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -62,16 +66,19 @@ const EditProfile = () => {
     }
 
     const onSubmit = async () => {
-        let userData = {...user};
-        let{name, phoneNumber, bio, address, image} = userData;   
-        if(!name || !phoneNumber || !address || !bio || !image) {
+        let userData = { ...user };
+        let { name, phoneNumber, bio, address, image } = userData;
+        if (!name || !phoneNumber || !address || !bio || !image) {
             Alert.alert('Profile', 'Please fill all fields');
             return;
         }
         setLoading(true);
 
-        if(typeof image == 'object') {
-         // upload the image   
+        if (typeof image == 'object') {
+            // upload the image 
+            let imagesRes = await uploadFile('profiles', image?.uri, true);
+            if (imagesRes.success) userData.image = imagesRes.data;
+            else userData.image = null;
         }
 
         //update user
@@ -81,17 +88,17 @@ const EditProfile = () => {
         console.log('[editProfile.js] updated user: ', res);
 
         if (res.success) {
-            setUserData({ ...currentUser, ...userData });
+            // Update the user state in AuthContext with the full user object
+            setUserData({ 
+                ...currentUser, 
+                ...userData,
+                image: userData.image ? { uri: userData.image } : null
+            });
             router.back();
         }
     }
 
-    /* The function below doesnt exist. It's just to escape the error. Delete it later when you have the function */
-    const getUserImageSrc = (image) => {
-        
-    }
-
-    let imageSource = user.image && typeof user.image == 'object' ? {uri: user.image.uri} : getUserImageSrc(user?.image);
+    let imageSource = user.image && typeof user.image == 'object' ? { uri: user.image.uri } : getUserImageSrc(user?.image);
 
     return (
         <ScreenWrapper bg='white'>
@@ -107,28 +114,28 @@ const EditProfile = () => {
                                 <Icon name="camera" size={20} strokeWidth={2.5} />
                             </Pressable>
                         </View>
-                        <Text style={{fontSize: hp(1.5), color: theme.colors.text}}>
+                        <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
                             Please fill your profile details
                         </Text>
-                        <Input 
+                        <Input
                             icon={<Icon name="user" />}
                             placeholder='Enter your name'
                             value={user.name}
                             onChangeText={value => setUser({ ...user, name: value })}
                         />
-                        <Input 
+                        <Input
                             icon={<Icon name="call" />}
                             placeholder='Enter your phone number'
                             value={user.phoneNumber}
                             onChangeText={value => setUser({ ...user, phoneNumber: value })}
                         />
-                        <Input 
+                        <Input
                             icon={<Icon name="location" />}
                             placeholder='Enter your address'
                             value={user.address}
                             onChangeText={value => setUser({ ...user, address: value })}
                         />
-                        <Input 
+                        <Input
                             placeholder='Enter your bio'
                             value={user.bio}
                             multiline={true}
